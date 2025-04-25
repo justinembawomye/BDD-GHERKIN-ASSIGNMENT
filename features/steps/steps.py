@@ -69,9 +69,11 @@ def step_impl_existing_email_error(context):
 # End of User Registration
 
 
+
+
 # User Login Scenario 1: User logs in with correct credentials
 
-@given('the user enters invalid username or password')
+@given('the user is on the login page on github')
 def step_impl(context):
     print("User is on the login page.")
 
@@ -87,9 +89,9 @@ def step_impl(context):
 
 # User Login Scenario 2: Invalid login credentials
 
-@given('the user enters valid username or password')
+@given('the user is on the login page')
 def step_impl(context):
-    print("Process user login.")
+    print("User is on the login page.")
 
 @when('the user enters invalid username or password')
 def step_impl(context):
@@ -98,23 +100,19 @@ def step_impl(context):
 
 @then('the user should see a login error message')
 def step_impl(context):
-    if context.logged_in is False:
-        print("Error message displayed: Invalid username or password.")
-        assert context.logged_in is False
-    else:
-        print("Unexpected behavior: User should have seen an error message.")
+    assert context.logged_in is False
+    print("Error message displayed: Invalid username or password.")
 
+# User Login Scenario 3: User Already Logged In
 
-# User Login Scenario 3: User is already logged in
-
-@given('the user is on the login page')
-def step_impl(context):
-    print("User is on the login page.")
-
-@when('the user is already logged in')
+@given('the user is already logged in')
 def step_impl(context):
     context.logged_in = True
     print("User is already logged in.")
+
+@when('the user tries to access the login page')
+def step_impl(context):
+    print("User is redirected to the dashboard because they are already logged in.")
 
 @then('the user should be redirected to the dashboard')
 def step_impl(context):
@@ -125,9 +123,9 @@ def step_impl(context):
 # End of user Login
 
 
-# User Creating a repository
+# User Creating a valid repository
 
-@given('the user is logged in')
+@given('the user is logged in his/her github')
 def step_impl(context):
     context.logged_in = True
     print("User is logged in.")
@@ -141,6 +139,65 @@ def step_impl(context):
 def step_impl(context):
     assert context.repo == "my-web-app"
     print("Repository visible on dashboard.")
+
+
+# # User Logged In Scenario
+# @given('the user is logged in check')
+# def step_impl(context):
+#     context.logged_in = True
+#     print("User is logged in.")
+
+# Repository Already Exists Scenario
+@given('the user is logged in github account')
+def step_impl_logged_in(context):
+    context.logged_in = True
+    print("User is logged in.")
+
+@when('the user tries to create a repository with an existing name')
+def step_impl_create_existing_repo(context):
+    context.repo_name = "existing-repo"
+    context.existing_repos = ["existing-repo", "my-web-app"]
+    if context.repo_name in context.existing_repos:
+        context.repo_creation_success = False
+    else:
+        context.repo_creation_success = True
+    print(f"User tried to create repository: {context.repo_name}")
+
+@then('the user should see a message indicating the repository already exists')
+def step_impl_existing_repo_error(context):
+    if not context.repo_creation_success:
+        print(f"Error: The repository '{context.repo_name}' already exists.")
+        assert context.repo_name in context.existing_repos
+    else:
+        print("Repository created successfully.")
+
+# Scenario 3 - Deleting Repository
+@given('the user is logged in their github account')
+def step_impl(context):
+    context.logged_in = True
+    context.existing_repos = ["repo-1", "repo-2", "my-web-app"]
+    print("User is logged in.")
+
+# Delete Repository Successfully Scenario
+@when('the user tries to delete a repository')
+def step_impl_delete_repo(context):
+    context.repo_to_delete = "repo-1"  # Simulate a repository the user wants to delete
+    if context.repo_to_delete in context.existing_repos:
+        context.existing_repos.remove(context.repo_to_delete)  # Simulate successful deletion
+        context.repo_deletion_success = True
+    else:
+        context.repo_deletion_success = False
+    print(f"User tried to delete repository: {context.repo_to_delete}")
+
+@then('the repository should be deleted and no longer visible in the dashboard')
+def step_impl_deleted_repo(context):
+    if context.repo_deletion_success:
+        print(f"Repository '{context.repo_to_delete}' successfully deleted.")
+        assert context.repo_to_delete not in context.existing_repos  # Confirm it's deleted
+    else:
+        print(f"Error: Repository '{context.repo_to_delete}' could not be deleted.")
+        assert context.repo_to_delete not in context.existing_repos  # Confirm non-existence
+
 
 
 # End of user creating a repo
