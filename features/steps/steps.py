@@ -69,12 +69,11 @@ def step_impl_existing_email_error(context):
 # End of User Registration
 
 
+# User Login Scenario 1: User logs in with correct credentials
 
-# User Login
-
-@given('the user is on the login page')
+@given('the user enters invalid username or password')
 def step_impl(context):
-    print("User is on login page.")
+    print("User is on the login page.")
 
 @when('the user enters valid username and password')
 def step_impl(context):
@@ -85,6 +84,42 @@ def step_impl(context):
 def step_impl(context):
     assert context.logged_in is True
     print("User is redirected to the GitHub dashboard.")
+
+# User Login Scenario 2: Invalid login credentials
+
+@given('the user enters valid username or password')
+def step_impl(context):
+    print("Process user login.")
+
+@when('the user enters invalid username or password')
+def step_impl(context):
+    context.logged_in = False
+    print("User entered invalid credentials.")
+
+@then('the user should see a login error message')
+def step_impl(context):
+    if context.logged_in is False:
+        print("Error message displayed: Invalid username or password.")
+        assert context.logged_in is False
+    else:
+        print("Unexpected behavior: User should have seen an error message.")
+
+
+# User Login Scenario 3: User is already logged in
+
+@given('the user is on the login page')
+def step_impl(context):
+    print("User is on the login page.")
+
+@when('the user is already logged in')
+def step_impl(context):
+    context.logged_in = True
+    print("User is already logged in.")
+
+@then('the user should be redirected to the dashboard')
+def step_impl(context):
+    assert context.logged_in is True
+    print("User is redirected to the dashboard.")
 
 
 # End of user Login
@@ -122,6 +157,7 @@ def step_impl(context):
 def step_impl(context):
     context.issue = "Bug report"
     print("Issue 'Bug report' created.")
+
 
 @then('the issue "Bug report" should be listed in the Issues tab')
 def step_impl(context):
