@@ -1,26 +1,69 @@
 from behave import given, when, then
 
-# User Registration
 
-@given('the user is on the registration page')
-def step_impl(context):
+#  list of existing emails
+existing_emails = ["user@example.com", "admin@example.com"]
+
+
+# User Registration Scenario 1: New user registers successfully
+
+@given('the user is on the registration page for valid registration')
+def step_impl_registration_page_valid(context):
     print("User is on registration page.")
 
 @when('the user submits valid registration details')
-def step_impl(context):
+def step_impl_valid_registration(context):
     context.registered = True
     print("User submitted valid details.")
 
 @then('the user account should be created')
-def step_impl(context):
+def step_impl_account_created(context):
     assert context.registered is True
     print("User account created.")
 
 @then('the user should be redirected to the login page')
-def step_impl(context):
+def step_impl_redirected_to_login(context):
     if context.registered:
         print("User redirected to the login page.")
 
+
+# User Registration Scenario 2: Invalid Registration Details
+
+@given('the user is on the registration page for invalid registration')
+def step_impl_registration_page_invalid(context):
+    print("User is on registration page.")
+
+@when('the user submits invalid registration details')
+def step_impl_invalid_registration(context):
+    context.registered = False
+    print("User submitted invalid details.")
+
+@then('the user should see an error message')
+def step_impl_error_message(context):
+    assert context.registered is False
+    print("Error message displayed for invalid details.")
+
+
+
+# User Registration Scenario 3: Registration with Existing Email
+
+@given('the user is on the registration page')
+def step_impl_registration_page_existing_email(context):
+    print("User is on the registration page.")
+
+@when('the user submits a registration with an existing email')
+def step_impl_registration_existing_email(context):
+    context.existing_email = "user@example.com"  # Existing email to simulate conflict
+    context.email_submitted = "user@example.com"  # Simulated user submission with the same email
+    print(f"User submitted registration with email: {context.email_submitted}")
+
+@then('the user should see a message indicating the email is already registered')
+def step_impl_existing_email_error(context):
+    if context.email_submitted in existing_emails:
+        print(f"Error: The email '{context.email_submitted}' is already registered.")
+        assert context.email_submitted in existing_emails
+    else:
+        print("Email registration successful.")
 
 
 # End of User Registration
