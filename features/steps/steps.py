@@ -204,7 +204,7 @@ def step_impl_deleted_repo(context):
 
 
 # Issues tracking
-
+# Scenario: User opens a new issue on a repo
 @given('the user is viewing the repository "my-web-app"')
 def step_impl(context):
     context.repo = "my-web-app"
@@ -213,13 +213,56 @@ def step_impl(context):
 @when('the user creates an issue titled "Bug report"')
 def step_impl(context):
     context.issue = "Bug report"
+    context.issues = getattr(context, 'issues', [])
+    context.issues.append(context.issue)
     print("Issue 'Bug report' created.")
-
 
 @then('the issue "Bug report" should be listed in the Issues tab')
 def step_impl(context):
-    assert context.issue == "Bug report"
+    assert "Bug report" in context.issues
     print("Issue appears in Issues tab.")
+
+
+# Scenario: User tries to create a duplicate issue
+@given('the repository "my-web-app" already has an issue titled "Bug report"')
+def step_impl(context):
+    context.repo = "my-web-app"
+    context.issues = ["Bug report"]
+    print("Repo already has an issue titled 'Bug report'.")
+
+@when('the user creates another issue titled "Bug report"')
+def step_impl(context):
+    context.new_issue = "Bug report"
+    context.duplicate_issue = context.new_issue in context.issues
+    print("User tried to create a duplicate issue.")
+
+@then('the user should see a message indicating the issue already exists')
+def step_impl(context):
+    assert context.duplicate_issue is True
+    print("Error: Issue with this title already exists.")
+
+
+# Scenario: User closes an existing issue
+@given('there is an open issue titled "Bug report" in the repository')
+def step_impl(context):
+    context.repo = "my-web-app"
+    context.issues = ["Bug report"]
+    print("Open issue 'Bug report' exists.")
+
+@when('the user closes the issue titled "Bug report"')
+def step_impl(context):
+    if "Bug report" in context.issues:
+        context.issues.remove("Bug report")
+        context.issue_closed = True
+    else:
+        context.issue_closed = False
+    print("User closed issue 'Bug report'.")
+
+@then('the issue "Bug report" should no longer be listed in the Issues tab')
+def step_impl(context):
+    assert "Bug report" not in context.issues
+    print("Issue 'Bug report' is no longer listed.")
+
 
 
 # End of issue tracking
