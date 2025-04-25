@@ -270,19 +270,72 @@ def step_impl(context):
 
 
 # Pull Request
+# Scenario: User submits a pull request
 @given('the user has committed changes to a new branch')
 def step_impl(context):
     context.branch = "feature-branch"
+    context.commits = 3
     print("Changes committed to feature-branch.")
 
 @when('the user opens a pull request to the main branch')
 def step_impl(context):
-    context.pull_request = True
+    if context.commits > 0:
+        context.pull_request = True
+        context.open_pull_requests = ["feature-branch"]
+    else:
+        context.pull_request = False
     print("Pull request opened.")
 
 @then('the pull request should appear in the list of open pull requests')
 def step_impl(context):
-    assert context.pull_request is True
+    assert "feature-branch" in context.open_pull_requests
     print("Pull request is visible.")
+
+
+# Scenario: User tries to open a pull request without committing changes
+@given('the user is on a new branch with no changes committed')
+def step_impl(context):
+    context.branch = "empty-branch"
+    context.commits = 0
+    print("User is on an empty branch with no commits.")
+
+@when('the user attempts to open a pull request')
+def step_impl(context):
+    if context.commits == 0:
+        context.pull_request = False
+        context.warning = "No changes to pull request."
+    else:
+        context.pull_request = True
+        context.warning = None
+    print("User attempted to open pull request.")
+
+@then('the pull request should not be created and a warning should be shown')
+def step_impl(context):
+    assert context.pull_request is False
+    assert context.warning == "No changes to pull request."
+    print(f"Warning: {context.warning}")
+
+
+# Scenario: User merges a pull request
+@given('there is an open pull request from "feature-branch" to "main"')
+def step_impl(context):
+    context.open_pull_requests = ["feature-branch"]
+    print("Pull request from 'feature-branch' is open.")
+
+@when('the user merges the pull request')
+def step_impl(context):
+    if "feature-branch" in context.open_pull_requests:
+        context.open_pull_requests.remove("feature-branch")
+        context.merged = True
+    else:
+        context.merged = False
+    print("Pull request merged.")
+
+@then('the pull request should be removed from the list of open pull requests')
+def step_impl(context):
+    assert "feature-branch" not in context.open_pull_requests
+    assert context.merged is True
+    print("Pull request has been removed from open list.")
+
 
 # End of pull request
